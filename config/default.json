@@ -1,0 +1,4 @@
+{
+    "mongoURI":"mongodb+srv://mnohit123:sayit@cluster0-hmrsc.mongodb.net/test?retryWrites=true&w=majority",
+    "jwtSecret":"myApp"
+}
