@@ -11,12 +11,24 @@ import store from "./store";
 import Alert from "./components/layout/Alerts";
 import setAuthToken from './utils/setAuthToken';
 import { loaduser } from './action/auth';
-import Dashboard from "./components/Dashboard/Dashboard"
+import Dashboard from "./components/Dashboard/Dashboard";
+import Profiles from "./profiles/Profiles"
+import Profile from "./profile/Profile"
 import Privateroute from "./components/routing/Privateroutiing";
+import Createprofile from "./profileform/Createprofile"
+import Editprofile from "./profileform/Editprofile"
+import Addexp from './profileform/Addexp';
+import Addedu from './profileform/Addedu';
+import Post from "./components/posts/post";
+import Posti from "./components/post/posti";
+
+
+if(localStorage.token){
+   setAuthToken(localStorage.token);
+}
  
 const App = ()=> {
-  useEffect(() => {
-    setAuthToken(localStorage.token);
+  useEffect(() => {     
     store.dispatch(loaduser());
   }, []);
   return (
@@ -30,7 +42,15 @@ const App = ()=> {
       <Switch >
       <Route exact path="/login" component={Login} />
       <Route exact path="/register" component={Register} />
+      <Route exact path="/profiles" component={Profiles} />
+      <Route exact path="/profile/:id" component={Profile} />
       <Privateroute exact path="/dashboard" component={Dashboard} />
+      <Privateroute exact path="/create-profile" component={Createprofile} />
+      <Privateroute exact path="/edit-profile" component={Editprofile} />
+      <Privateroute exact path="/add-experience" component={Addexp} />
+      <Privateroute exact path="/add-education" component={Addedu} />
+      <Privateroute exact path="/posts" component={Post} />
+      <Privateroute exact path="/post/:id" component={Posti} />
       </Switch> 
       </section>         
     </Fragment>

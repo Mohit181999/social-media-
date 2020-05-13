@@ -60,7 +60,7 @@ router.post(
       user: req.user.id,
       company,
       location,
-      website: website === '' ? '' : normalize(website, { forceHttps: true }),
+      //website: website === '' ? '' : normalize(website, { forceHttps: true }),
       bio,
       skills: Array.isArray(skills)
         ? skills
@@ -70,13 +70,13 @@ router.post(
     };
 
     // Build social object and add to profileFields
-    const socialfields = { youtube, twitter, instagram, linkedin, facebook };
+    /*const socialfields = { youtube, twitter, instagram, linkedin, facebook };
 
     for (const [key, value] of Object.entries(socialfields)) {
       if (value && value.length > 0)
         socialfields[key] = normalize(value, { forceHttps: true });
     }
-    profileFields.social = socialfields;
+    profileFields.social = socialfields;*/
 
     try {
       
