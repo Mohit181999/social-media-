@@ -80,7 +80,7 @@ export const addpost = formdata => async dispatch =>{
 
 export const getIndipost = id =>async dispatch=>{
     try {
-        const res = axios.get(`/API/posts/${id}`);
+        const res = axios.get(`/API/post/${id}`);
         dispatch({
             type:GET_POST,
             payload:res.data
