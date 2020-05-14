@@ -85,7 +85,7 @@ router.put('/unlike/:id',auth,async(req,res)=>{
         res.status(500).send('server err');
     }
 });
-router.post('/comment/:id',auth,[
+router.post('/comment/:id',[auth,
     check('text','text is required').not().isEmpty()
 ],async(req,res)=>{
     const error=validationResult(req);
@@ -103,7 +103,7 @@ router.post('/comment/:id',auth,[
         await post.save();
         res.json(post.comments);
     }catch(err){
-        console.log(err);
+        console.log(err)
         res.status(500).send('server err');
     }
     

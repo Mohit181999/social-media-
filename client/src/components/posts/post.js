@@ -19,7 +19,7 @@ const Post = ({post:{posts,loading},getAllPosts}) =>{
             <div className='posts'>
                 <Postform />
                 {posts.map(post =>(
-                    <PostItem key={post._id} post={post} />
+                    <PostItem key={post._id} post={post}/>
                 ))}
                 </div>
         </div>)}

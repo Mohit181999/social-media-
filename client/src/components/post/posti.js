@@ -4,14 +4,21 @@ import { connect } from "react-redux";
 import {getIndipost} from "../../action/post";
 import Spinner from "../layout/spinner";
 import PostItem from "../posts/PostItem";
-
+import { Link } from "react-router-dom";
+import Comments from "./comments"
+import CommentItem from "./commentitem"
 const Posti = ({getIndipost,post:{post,loading},match}) =>{
     useEffect(()=>{
         getIndipost(match.params.id)
     },[getIndipost,match.params.id])
     return (
          loading || post === null ? <Spinner /> : <div>
-             <PostItem post = {post} />
+             <Link to="/posts" className="btn">Back to all posts</Link>
+             <PostItem post = {post} showAction ={false}/>
+             <Comments postid= {post._id} />
+             {post.comments.map(com=>(
+                 <CommentItem key={com._id} comment={com} postid={post._id} />
+             ))}
          </div>
     )
 }
