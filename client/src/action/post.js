@@ -80,7 +80,9 @@ export const addpost = formdata => async dispatch =>{
 
 export const getIndipost = id =>async dispatch=>{
     try {
+
         const res = await axios.get(`/API/post/${id}`);
+
         dispatch({
             type:GET_POST,
             payload:res.data
@@ -91,6 +93,7 @@ export const getIndipost = id =>async dispatch=>{
         });
     }
 }
+
 export const addcomment = (postid,formdata) => async dispatch =>{
     const config = {
         headers:{
@@ -125,3 +128,4 @@ export const delcomment = (postid,commentid) => async dispatch =>{
         });
     }
 }
+
