@@ -43,7 +43,9 @@ export default function(state=intialState,action){
         case DELETE_COMMENT:
             return{
                 ...state,
-                post:state.post.comments.filter(com=>com._id!==payload),
+                post:{...state.post,
+                    comments:state.post.comments.filter(com=>com._id!==payload)
+                },
                 loading:false
             }
         case POSTS_ERR:

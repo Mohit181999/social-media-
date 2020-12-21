@@ -17,10 +17,11 @@ import Profile from "./profile/Profile"
 import Privateroute from "./components/routing/Privateroutiing";
 import Createprofile from "./profileform/Createprofile"
 import Editprofile from "./profileform/Editprofile"
-import Addexp from './profileform/Addexp';
-import Addedu from './profileform/Addedu';
 import Post from "./components/posts/post";
 import Posti from "./components/post/posti";
+import Editpost from './components/posts/Editpost';
+import following from './components/Dashboard/following';
+import follower from './components/Dashboard/follower';
 
 
 if(localStorage.token){
@@ -45,12 +46,14 @@ const App = ()=> {
       <Route exact path="/profiles" component={Profiles} />
       <Route exact path="/profile/:id" component={Profile} />
       <Privateroute exact path="/dashboard" component={Dashboard} />
+      <Privateroute exact path="/following" component={following} />
+      <Privateroute exact path="/followers" component={follower} />
       <Privateroute exact path="/create-profile" component={Createprofile} />
       <Privateroute exact path="/edit-profile" component={Editprofile} />
-      <Privateroute exact path="/add-experience" component={Addexp} />
-      <Privateroute exact path="/add-education" component={Addedu} />
+      <Privateroute exact path="/edit-post/:id" component={Editpost} />
       <Privateroute exact path="/posts" component={Post} />
       <Privateroute exact path="/post/:id" component={Posti} />
+       
       </Switch> 
       </section>         
     </Fragment>

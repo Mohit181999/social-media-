@@ -1,6 +1,4 @@
 const express = require('express');
-const axios = require('axios');
-const config = require('config');
 const router = express.Router();
 const auth = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
@@ -18,7 +16,7 @@ router.get('/me', auth, async (req, res) => {
     if (!profile) {
       return res.status(400).json({ msg: 'There is no profile for this user' });
     }
-
+   // console.log(profile);
     res.json(profile);
   } catch (err) {
     console.error(err.message);
@@ -32,8 +30,8 @@ router.post(
   [
     auth,
     [
-      check('status', 'Status is required').not().isEmpty(),
-      check('skills', 'Skills is required').not().isEmpty()
+      check('bio', 'bio is required').not().isEmpty(),
+       
     ]
   ],
   async (req, res) => {
@@ -42,41 +40,16 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
     const {
-      company,
-      location,
-      website,
-      bio,
-      skills,
-      status,
-      githubusername,
-      youtube,
-      twitter,
-      instagram,
-      linkedin,
-      facebook
+       
+      bio
     } = req.body;
 
     const profileFields = {
       user: req.user.id,
-      company,
-      location,
-      //website: website === '' ? '' : normalize(website, { forceHttps: true }),
-      bio,
-      skills: Array.isArray(skills)
-        ? skills
-        : skills.split(',').map((skill) => ' ' + skill.trim()),
-      status,
-      githubusername
+      bio
     };
 
-    // Build social object and add to profileFields
-    /*const socialfields = { youtube, twitter, instagram, linkedin, facebook };
-
-    for (const [key, value] of Object.entries(socialfields)) {
-      if (value && value.length > 0)
-        socialfields[key] = normalize(value, { forceHttps: true });
-    }
-    profileFields.social = socialfields;*/
+     
 
     try {
       
@@ -95,7 +68,7 @@ router.post(
  
 router.get('/', async (req, res) => {
   try {
-    const profiles = await Profile.find().populate('user', ['name', 'avatar']);
+    const profiles = await Profile.find().populate('user', ['name', 'avatar','followers','following']);
     res.json(profiles);
   } catch (err) {
     console.error(err.message);
@@ -110,7 +83,7 @@ router.get(
     try {
       const profile = await Profile.findOne({
         user: user_id
-      }).populate('user', ['name', 'avatar']);
+      }).populate('user', ['name', 'avatar','followers','following']);
 
       if (!profile) return res.status(400).json({ msg: 'Profile not found' });
 
@@ -138,154 +111,158 @@ router.delete('/', auth, async (req, res) => {
   }
 });
 
- 
-router.put(
-  '/experience',
-  [
-    auth,
-    [
-      check('title', 'Title is required').not().isEmpty(),
-      check('company', 'Company is required').not().isEmpty(),
-      check('from', 'From date is required and needs to be from the past')
-        .not()
-        .isEmpty()
-        .custom((value, { req }) => (req.body.to ? value < req.body.to : true))
-    ]
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const {
-      title,
-      company,
-      location,
-      from,
-      to,
-      current,
-      description
-    } = req.body;
-
-    const newExp = {
-      title,
-      company,
-      location,
-      from,
-      to,
-      current,
-      description
-    };
-
-    try {
-      const profile = await Profile.findOne({ user: req.user.id });
-
-      profile.experience.unshift(newExp);
-
-      await profile.save();
-
-      res.json(profile);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
-  }
-);
-
-// @route    DELETE api/profile/experience/:exp_id
-// @desc     Delete experience from profile
-// @access   Private
-
-router.delete('/experience/:exp_id', auth, async (req, res) => {
+router.put('/following/:id',auth,async(req,res)=>{
   try {
-    const foundProfile = await Profile.findOne({ user: req.user.id });
-
-    foundProfile.experience = foundProfile.experience.filter(
-      (exp) => exp._id.toString() !== req.params.exp_id
-    );
-
-    await foundProfile.save();
-    return res.status(200).json(foundProfile);
+    const follow=await User.findById(req.params.id);
+    const follower=await User.findById(req.user.id);
+    const profile=await Profile.findOne({user:req.params.id})
+    if(profile.followers.filter(follower=>follower.user.toString()===req.user.id).length>0){
+      return res.status(400).json({msg:'You are already following the user'});
+  }
+    
+    const user=await Profile.findOne({user:req.user.id})
+    const newFollower=({
+      user:req.user.id,
+      name:follower.name,
+      avatar:follower.avatar
+    })
+    profile.followers.unshift(newFollower);
+    await profile.save();
+    const newFollowing=({
+      user:req.params.id,
+      name:follow.name,
+      avatar:follow.avatar
+    })
+    user.following.unshift(newFollowing);
+    await user.save();
+    console.log(profile.followers);
+    res.json(profile.followers);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ msg: 'Server error' });
+    console.error(error.message);
+    res.status(500).send('Server Error');
+  }
+})
+
+router.put('/unfollow/:id',auth,async(req,res)=>{
+  try {
+    const profile=await Profile.findOne({user:req.params.id});
+    if(profile.followers.filter(follower=>follower.user.toString()===req.user.id).length===0){
+      return res.status(400).json({msg:'You are not following this user'});
+  }
+    const user=await Profile.findOne({user:req.user.id});
+    const remind=profile.followers.map(follower=>follower.id).indexOf(req.user.id);
+    profile.followers.splice(remind,1);
+    await profile.save();
+    
+    const rem=user.following.map(following=>following.id).indexOf(req.params.id);
+    user.following.splice(rem,1);
+    await user.save();
+    res.json(profile.followers);
+  } catch (error) {
+    res.status(500).send('server err');
+  }
+})
+// Add a user to the list of users you are following
+/*router.patch('/following/',auth, async (req, res) => {
+
+  if (!req.body.idToFollow) {
+    return res.status(404).json({ message: 'No ID found' });
+  }
+  if (req.body.idToFollow===req.user.id){
+    return res.status(201).json({msg:'Can not follow yourself'});
+  }
+  try {
+    await User.findByIdAndUpdate(
+      req.user.id,
+      { $addToSet: { following: req.body.idToFollow } },
+      { new: true, upsert: true },
+      (err, doc) => {
+        if (err) {
+          return res.status(400).json(err);
+        }
+        
+        return res.status(201).json(doc);
+      }
+    );
+  } catch (e) {
+    return res.status(500).json(err);
   }
 });
 
-// @route    PUT api/profile/education
-// @desc     Add profile education
-// @access   Private
-router.put(
-  '/education',
-  [
-    auth,
-    [
-      check('school', 'School is required').not().isEmpty(),
-      check('degree', 'Degree is required').not().isEmpty(),
-      check('fieldofstudy', 'Field of study is required').not().isEmpty(),
-      check('from', 'From date is required and needs to be from the past')
-        .not()
-        .isEmpty()
-        .custom((value, { req }) => (req.body.to ? value < req.body.to : true))
-    ]
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const {
-      school,
-      degree,
-      fieldofstudy,
-      from,
-      to,
-      current,
-      description
-    } = req.body;
-
-    const newEdu = {
-      school,
-      degree,
-      fieldofstudy,
-      from,
-      to,
-      current,
-      description
-    };
-
-    try {
-      const profile = await Profile.findOne({ user: req.user.id });
-
-      profile.education.unshift(newEdu);
-
-      await profile.save();
-
-      res.json(profile);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
+// Remove a user from the list of users you are following
+router.patch('/unfollowing',auth, async (req, res) => {
+   if (!req.body.idToUnfollow) {
+    return res.status(404).json({ message: 'No ID found' });
   }
-);
 
- 
-
-router.delete('/education/:edu_id', auth, async (req, res) => {
   try {
-    const foundProfile = await Profile.findOne({ user: req.user.id });
-    foundProfile.education = foundProfile.education.filter(
-      (edu) => edu._id.toString() !== req.params.edu_id
+    await User.findByIdAndUpdate(
+      req.user.id,
+      { $pull: { following: req.body.idToUnfollow } },
+      { new: true, upsert: true },
+      (err, doc) => {
+        if (err) {
+          return res.status(400).json(err);
+        }
+        return res.status(200).json(doc);
+      }
     );
-    await foundProfile.save();
-    return res.status(200).json(foundProfile);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ msg: 'Server error' });
+  } catch (e) {
+    return res.status(500).json(e);
   }
 });
+
+// Add a user to the list of users that are following you
+router.patch('/followers/:id',auth, async (req, res) => {
+  const { id } = req.params;
+
+  if (!req.user.id) {
+    return res.status(404).json({ message: 'No ID found' });
+  }
+
+  try {
+    await User.findByIdAndUpdate(
+      id,
+      { $addToSet: { followers: req.user.id } },
+      { new: true, upsert: true },
+      (err, doc) => {
+        if (err) {
+          return res.status(400).json(err);
+        }
+        console.log(doc);
+        return res.status(201).json(doc);
+      }
+    );
+  } catch (e) {
+    return res.status(500).json(err);
+  }
+});
+
+ // Remove a user from the list of users that are following you
+router.patch('/unfollowers/:id',auth, async (req, res) => {
+  const { id } = req.params;
+  if (!req.user.id) {
+    return res.status(404).json({ message: 'No ID found' });
+  }
+
+  try {
+    await User.findByIdAndUpdate(
+      id,
+      { $pull: { followers: req.user.id } },
+      { new: true, upsert: true },
+      (err, doc) => {
+        if (err) {
+          return res.status(400).json(err);
+        }
+        return res.status(200).json(doc);
+      }
+    );
+  } catch (e) {
+    c
+    return res.status(500).json(e);
+  }
+});
+*/
 
  
  

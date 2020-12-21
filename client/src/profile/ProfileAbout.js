@@ -4,26 +4,34 @@ import PropTypes from 'prop-types';
 const ProfileAbout = ({
   profile: {
     bio,
-    skills,
+    followers,
+    following,
     user: { name }
   }
 }) => (
   <div className='profile-about bg-light p-2'>
     {bio && (
       <Fragment>
-        <h2 className='text-primary'>{name.trim().split(' ')[0]}s Bio</h2>
+        <h2 className='text-primary'>About</h2>
         <p>{bio}</p>
         <div className='line' />
       </Fragment>
     )}
-    <h2 className='text-primary'>Skill Set</h2>
-    <div className='skills'>
-      {skills.map((skill, index) => (
-        <div key={index} className='p-1'>
-          <i className='fas fa-check' /> {skill}
-        </div>
-      ))}
-    </div>
+     {followers.length>0 && (
+      <Fragment>
+        <h2 className='text-primary'>Followers</h2>
+        <p>{followers.length}</p>
+        <div className='line' />
+      </Fragment>
+    )}
+     {following.length>0 && (
+      <Fragment>
+        <h2 className='text-primary'>following</h2>
+        <p>{following.length>0}</p>
+        <div className='line' />
+      </Fragment>
+    )}
+     
   </div>
 );
 

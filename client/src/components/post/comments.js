@@ -12,7 +12,7 @@ const Comments = ({postid,addcomment}) => {
         </div>
         <form className="form my-1" onSubmit={e=>{
             e.preventDefault();
-            addcomment({postid,text});
+            addcomment(postid,{text});
             settext('');
         }}>
           <textarea
@@ -22,7 +22,7 @@ const Comments = ({postid,addcomment}) => {
             placeholder="Enter a comment"
             value={text}
             onChange={(e)=>settext(e.target.value)}
-            required></textarea>
+             ></textarea>
           <input type="submit" className="btn btn-dark my-1" value="Submit" />
         </form>
       </div>

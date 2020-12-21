@@ -14,10 +14,10 @@ const Posti = ({getIndipost,post:{post,loading},match}) =>{
     return (
          loading || post === null ? <Spinner /> : <div>
              <Link to="/posts" className="btn">Back to all posts</Link>
-             <PostItem post = {post} showAction ={false}/>
+             <PostItem post = {post} showAction={false}/>
              <Comments postid= {post._id} />
-             {post.comments.map(com=>(
-                 <CommentItem key={com._id} comment={com} postid={post._id} />
+             {post.comments.map(comment=>(
+                 <CommentItem key={comment._id} comment={comment} postid={post._id} />
              ))}
          </div>
     )

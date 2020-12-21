@@ -3,10 +3,11 @@ import {Link} from "react-router-dom";
 import PropsTypes from "prop-types";
 import {connect} from "react-redux";
 import {getCurrentProfile, deleteAcc} from "../../action/profile"
+import Bio from "./bio"
 import Dashboardactions from "./Dahboaractions"
 import Spinner from "../layout/spinner"
-import Experience from "./Experience";
-import Education from "./Education";
+import Userposts from "./Userposts";
+ 
 
 const Dashboard = ( {getCurrentProfile,deleteAcc,
     auth: { user },
@@ -29,9 +30,14 @@ const Dashboard = ( {getCurrentProfile,deleteAcc,
       </Fragment>
       ) : (         
       <Fragment>
-      <Dashboardactions />
-      <Experience experience={profile.experience} />
-      <Education education={profile.education} />
+      <Dashboardactions profile={profile}/>
+      <br></br>
+      <hr></hr>
+      <Bio bio={profile.bio} followers={profile.followers} following={profile.following}/>
+      <br></br>
+      <hr></hr>
+      <br></br>
+      <Userposts />
       <div className="my-2">
         <button onClick={()=>deleteAcc()} className="btn btn-danger" >Delete My Account</button>
       </div>

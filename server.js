@@ -18,5 +18,7 @@ app.use('/API/post', require('./routes/API/post'));
 app.use('/API/auth', require('./routes/API/auth'));
 
 
+
+
 const port=process.env.PORT || 7000;
 app.listen(port,()=>console.log(`Connected to port ${port}`));

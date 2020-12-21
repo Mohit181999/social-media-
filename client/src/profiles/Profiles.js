@@ -16,12 +16,14 @@ const Profiles = ({getAllProfiles,profile:{profiles,loading}})=>{
                 <i className="fab fa-connectdevelop">Browse and explore</i>
             </p>
             <div className="profiles">
-            {profiles.length>0?(profiles.map(profile=><Profilesitem key={profile._id} profile={profile} />)):(<h4>Profiles not found</h4>)
+            {(profiles.map(profile=><Profilesitem key={profile._id} profile={profile} />))
             }</div>
         </div>)}
         </div>
     )
 }
+
+
 
 Profiles.propsTypes ={
     getAllProfiles:PropsTypes.func.isRequired,

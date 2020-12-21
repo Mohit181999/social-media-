@@ -1,6 +1,14 @@
 import axios from "axios";
 import {setAlert} from"./alert"
-import {PROFILE_SUCCESS,PROFILE_ERROR,UPDATE_PROFILE, CLEAR_PROFILE,DELLETE_ACC,GET_PROFILES} from "./type";
+import {PROFILE_SUCCESS,
+        PROFILE_ERROR,
+        UPDATE_PROFILE, 
+        CLEAR_PROFILE,
+        DELLETE_ACC,
+        GET_PROFILES,
+        UPDATE_FOLLOWERS,
+        UPDATE_FOLLOWING,
+      GET_FOLLOWERS,GET_FOLLOWING} from "./type";
 
 export const getCurrentProfile = () => async dispatch => {
     try {
@@ -33,97 +41,15 @@ export const getCurrentProfile = () => async dispatch => {
       dispatch(setAlert(edit?'Profile Updated':'Profile _Created'));
       if(!edit)history.push('/dashboard');
     } catch (err) {
-      const errors = err.response.data.errors;
-
-    if (errors) {
-      errors.forEach((error) => dispatch(setAlert(error.msg, 'danger')));
-    }
+       
+     
     dispatch({
       type: PROFILE_ERROR,
     });
     }
   } 
   
-  export const addExp=(formdata,history)=> async dispatch=>{
-    try {
-      const config={
-        header:{
-          'Content-type':'application/json'
-        }
-      }
-      const res=await axios.put('/API/profile/experience',formdata,config);
-      dispatch({
-        type: UPDATE_PROFILE,
-        payload: res.data
-      });
-      dispatch(setAlert('EXPERIENCE ADDED','SUCCESS'));
-      history.push('/dashboard');
-    } catch (err) {
-      const errors = err.response.data.errors;
-
-    if (errors) {
-      errors.forEach((error) => dispatch(setAlert(error.msg, 'danger')));
-    }
-    dispatch({
-      type: PROFILE_ERROR,
-    });
-    }
-  } 
-
-
-  export const addEdu=(formdata,history)=> async dispatch=>{
-    try {
-      const config={
-        header:{
-          'Content-type':'application/json'
-        }
-      }
-      const res=await axios.put('/API/profile/education',formdata,config);
-      dispatch({
-        type: UPDATE_PROFILE,
-        payload: res.data
-      });
-      dispatch(setAlert('EDUCATION ADDED','SUCCESS'));
-      history.push('/dashboard');
-    } catch (err) {
-      const errors = err.response.data.errors;
-
-    if (errors) {
-      errors.forEach((error) => dispatch(setAlert(error.msg, 'danger')));
-    }
-    dispatch({
-      type: PROFILE_ERROR,
-    });
-    }
-  } 
   
-  export const deleteExp = id =>async dispatch=>{
-    try {
-      const res=await axios.delete(`/API/profile/experience/${id}`);
-      dispatch({
-        type: UPDATE_PROFILE,
-        payload: res.data});
-        dispatch(setAlert('Experience deleted','SUCCESS'));
-    } catch (err) {
-      dispatch({
-        type: PROFILE_ERROR,
-      });
-    }
-  }
-
-  export const deleteEdu = id =>async dispatch=>{
-    try {
-      const res=await axios.delete(`/API/profile/education/${id}`);
-      dispatch({
-        type: UPDATE_PROFILE,
-        payload: res.data});
-        dispatch(setAlert('Education deleted','SUCCESS'));
-    } catch (err) {
-      dispatch({
-        type: PROFILE_ERROR,
-      });
-    }
-  }
   export const deleteAcc= ()=>async dispatch=>{
     if(window.confirm('Are you sure you want to delete account')){
       try {
@@ -165,3 +91,45 @@ export const getCurrentProfile = () => async dispatch => {
       });
     }
   }
+  export const followUser = (id) => async (dispatch) => {
+   
+    const res = await axios.put(`/API/profile/following/${id}`);
+     
+    dispatch(setAlert('FOLLOWING','SUCCESS'));
+    dispatch({
+      type: UPDATE_FOLLOWERS,
+      payload:{id,follower:res.data}
+    });
+   
+     
+    
+  };
+  export const unfollowUser = (id) => async (dispatch) => {
+    const res = await axios.put(`/API/profile/unfollow/${id}`);
+
+     
+    dispatch({
+      type: UPDATE_FOLLOWERS,
+      payload:{id,follower:res.data}
+    });
+    dispatch(setAlert('UNFOLLOWED','SUCCESS'));
+    
+    
+  };
+
+  export const getFollowers = userId => async (dispatch) => {
+    const result = await axios.get(`/users/${userId}`);
+    return dispatch({
+      type: GET_FOLLOWERS,
+      payload: result.data
+    });
+  };
+  
+  export const getFollowing = userId => async (dispatch) => {
+    const result = await axios.get(`/users/${userId}`);
+    return dispatch({
+      type: GET_FOLLOWING,
+      payload: result.data
+    });
+  };
+  

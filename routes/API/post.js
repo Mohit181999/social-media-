@@ -15,6 +15,7 @@ router.post('/',auth,[
         const user=await User.findById(req.user.id);
         const newPost=new Post({
             text: req.body.text,
+            showAction:req.body.showAction,
             name: user.name,
             avatar: user.avatar,
             user: req.user.id
@@ -27,18 +28,62 @@ router.post('/',auth,[
     }
     
 });
-router.get('/',async(req,res)=>{
+router.get('/',auth,async(req,res)=>{
     try{
         const post=await Post.find().sort({date:-1});
+        const cu=await Profile.findOne({user:req.user.id});
+        const fpost=[];
+        post.forEach(post=>{
+            if(post.user.toString()===req.user.id){
+                fpost.push(post);
+            }
+            cu.following.map(follow=>{
+                if(post.user.toString()===follow.user.toString()){
+                    fpost.push(post);
+                   }
+            })
+        });
+        
+        res.json(fpost);
+    }catch(err){
+        console.log(err)
+        res.status(500).send('server err');
+    }
+});
+router.get('/me', auth, async (req, res) => {
+    try {
+      const post = await Post.find({
+        user: req.user.id
+      });
+  
+      if (!post) {
+        return res.status(400).json({ msg: 'There is no post for this user' });
+      }
+  
+      res.json(post);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  });
+router.get('/:id',auth,async(req,res)=>{
+    try{
+        const post=await Post.findById(req.params.id);
         res.json(post);
     }catch(err){
         console.log(err)
         res.status(500).send('server err');
     }
 });
-router.get('/:id',auth,async(req,res)=>{
+router.post('/:id',auth,async(req,res)=>{
     try{
-        const post=await Post.findById(req.params.id);
+        const PostFields ={
+            text: req.body.text,
+            
+        }
+        const post=await Post.findByIdAndUpdate(req.params.id,          
+            { $set: PostFields },
+            { new: true, upsert: true });
         res.json(post);
     }catch(err){
         console.log(err)
@@ -109,27 +154,34 @@ router.post('/comment/:id',[auth,
     
 });
 
-router.delete('/comments/:id/:com_id',auth,async(req,res)=>{
-try{
-    const post = Post.findById(req.params.id);
+ router.delete('/comment/:id/:comment_id', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
 
-    const comment=post.comments.find(com=>com.id===req.params.com_id);
-    if(!comment){
-        return res.status(400).json({msg:'no comment exits'});
+    // Pull out comment
+    const comment = post.comments.find(
+      (comment) => comment.id === req.params.comment_id
+    );
+    // Make sure comment exists
+    if (!comment) {
+      return res.status(404).json({ msg: 'Comment does not exist' });
     }
-    if(comment.user.toString()!==req.user.id){
-        return res.status(400).json({msg:'user not authorized'});
+    // Check user
+    if (comment.user.toString() !== req.user.id) {
+      return res.status(401).json({ msg: 'User not authorized' });
     }
-    const remcomment=post.comments.map(item=>item.id).indexOf(req.user.id);
-        post.comments.splice(remcomment,1);
-        await post.save();
-        res.json(post.comment);
-}
-catch(err){
-    console.log(err);
-    res.status(500).send('server err');
-}
+
+    post.comments = post.comments.filter(
+      ({ id }) => id !== req.params.comment_id
+    );
+
+    await post.save();
+
+    return res.json(post.comments);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send('Server Error');
+  }
 });
-
 
 module.exports=router;

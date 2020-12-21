@@ -15,6 +15,19 @@ export const getAllPosts = ()=>async dispatch=>{
         });
     }
 }
+export const getAllPostuser = ()=>async dispatch=>{
+    try {
+        const res = await axios.get('/API/post/me');
+        dispatch({
+            type:GET_POSTS,
+            payload:res.data
+        });
+    } catch (err) {
+        dispatch({
+            type:POSTS_ERR,
+        });
+    }
+}
 
 export const addlikes= id=>async dispatch=>{
     try {
@@ -66,11 +79,33 @@ export const addpost = formdata => async dispatch =>{
     }
     try {
        const res= await axios.post(`/API/post`,formdata,config);
-        dispatch({
+       console.log(res.data);
+       dispatch({
             type:ADD_POST,
             payload:res.data
         })
         dispatch(setAlert('Post created','success'));
+    } catch (err) {
+        dispatch({
+            type:POSTS_ERR,
+        });
+    }
+}
+export const editpost = (formdata,id) => async dispatch =>{
+    
+    try {
+        const config = {
+            headers:{
+                'Content-Type':'application/json'
+            }
+        }
+       const res= await axios.post(`/API/post/${id}`,formdata,config);
+       //console.log(res.data);
+       dispatch({
+            type:ADD_POST,
+            payload:res.data
+        })
+        dispatch(setAlert('Post updated','success'));
     } catch (err) {
         dispatch({
             type:POSTS_ERR,
@@ -114,12 +149,12 @@ export const addcomment = (postid,formdata) => async dispatch =>{
     }
 }
 
-export const delcomment = (postid,commentid) => async dispatch =>{
+export const delcomment = (postid,id) => async dispatch =>{
     try {
-        await axios.delete(`/API/post/${postid}/${commentid}`);
+        await axios.delete(`/API/post/comment/${postid}/${id}`);
         dispatch({
             type:DELETE_COMMENT,
-            payload:commentid
+            payload:id
         })
         dispatch(setAlert('Comment deleted','success'));
     } catch (err) {

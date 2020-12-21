@@ -1,6 +1,7 @@
 const mongoose=require('mongoose');
+const Schema = mongoose.Schema;
+const newUser=new Schema({
 
-const newUser=new mongoose.Schema({
     name:{
         type:String,
         required:true
@@ -20,7 +21,12 @@ const newUser=new mongoose.Schema({
         type:Date,
         default:Date.now
     },
-    
+    followers:[
+         String
+     ],
+     following:[
+        String
+     ]
 });
 
 module.exports=User=mongoose.model('user',newUser);
